@@ -96,3 +96,36 @@ func (l *ESLogger) Info(msg string) {
 	}
 	l.zerologger.Info().Msg(msg)
 }
+
+func (l *ESLogger) Error(msg string) {
+	data, _ := json.Marshal(record{Level: "error", Time: time.Now(), Msg: msg})
+
+	err := l.esBulkIndexer.Add(context.Background(), esutil.BulkIndexerItem{
+		Action: "index",
+		Body:   bytes.NewReader(data),
+		OnFailure: func(ctx context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
+			l.zerologger.Error().Err(err).Msg("Error has been occurred while sending item from the bulk indexer")
+		},
+	})
+	if err != nil {
+		l.zerologger.Error().Err(err).Msg("Error has been occurred while adding item to the bulk indexer")
+	}
+	l.zerologger.Error().Msg(msg)
+}
+
+func (l *ESLogger) Fatal(msg string) {
+	data, _ := json.Marshal(record{Level: "fatal", Time: time.Now(), Msg: msg})
+
+	err := l.esBulkIndexer.Add(context.Background(), esutil.BulkIndexerItem{
+		Action: "index",
+		Body:   bytes.NewReader(data),
+		OnFailure: func(ctx context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
+			l.zerologger.Error().Err(err).Msg("Error has been occurred while sending item from the bulk indexer")
+		},
+	})
+	if err != nil {
+		l.zerologger.Error().Err(err).Msg("Error has been occurred while adding item to the bulk indexer")
+	}
+
+	l.zerologger.Fatal().Msg(msg)
+}
