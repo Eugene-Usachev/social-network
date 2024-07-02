@@ -21,7 +21,7 @@ type ESLogger struct {
 
 var _ Logger = (*ESLogger)(nil)
 
-func NewElasticSearchLogger(addresses []string, user, pass string) Logger {
+func MustCreateElasticSearchLogger(addresses []string, user, pass string) Logger {
 	logger := zerolog.New(os.Stdout)
 
 	esClient, err := elasticsearch.NewClient(elasticsearch.Config{

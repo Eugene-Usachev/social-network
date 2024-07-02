@@ -81,6 +81,7 @@ services:
       - 4040:4040
     environment:
       - PORT=4040
+      - HOST=server
       - IS_PRODUCTION=false
       - ES_ADDRESSES=["http://elasticsearch:9200"]
       - ES_USERNAME=elastic
@@ -94,7 +95,7 @@ services:
       - REDIS_PASSWORD=your_redis_password
       - FST_ACCESS_KEY=your_fst_access_key
       - FST_REFRESH_KEY=your_fst_refresh_key
-      - PROMETHEUS_ADDRESS=prometheus:9090
+      - METRICS_ADDRESS=prometheus:9090
     depends_on:
 #      elasticsearch:
 #        condition: service_started
