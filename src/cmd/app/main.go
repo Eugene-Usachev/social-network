@@ -17,13 +17,7 @@ import (
 func main() {
 	cfg := config.MustNewConfig()
 
-	var logger loggerpkg.Logger
-
-	if cfg.IsProduction() {
-		logger = loggerpkg.MustCreateElasticSearchLogger(cfg.EsAddr(), cfg.EsUser(), cfg.EsPass())
-	} else {
-		logger = loggerpkg.NewZeroLogger()
-	}
+	logger := loggerpkg.MustCreateLogger(cfg.IsProduction(), cfg)
 
 	logger.Info("Created logger")
 
