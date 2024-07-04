@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
+	"github.com/Eugune-Usachev/social-network/src/customErrors"
+	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"social-network/src/internal/model"
 )
 
 type AuthRepository struct {
@@ -33,7 +34,7 @@ func (authRepository AuthRepository) IsEmailBusy(ctx context.Context, email stri
 	return isExists, nil
 }
 
-func (authRepository AuthRepository) SignUp(ctx context.Context, model model.SignUp) (id int, err error) {
+func (authRepository AuthRepository) SignUp(ctx context.Context, model *model.SignUp) (id int, err error) {
 	const query = "INSERT INTO users (name, second_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id"
 
 	row := authRepository.postgres.QueryRow(ctx, query, model.Name, model.SecondName, model.Email, model.Password)
@@ -47,7 +48,6 @@ func (authRepository AuthRepository) SignUp(ctx context.Context, model model.Sig
 
 var (
 	InvalidPassword = errors.New("invalid password")
-	NotFound        = errors.New("user not found")
 )
 
 func (authRepository AuthRepository) SignIn(ctx context.Context, email, password string) (id int, err error) {
@@ -58,7 +58,7 @@ func (authRepository AuthRepository) SignIn(ctx context.Context, email, password
 
 	if err = row.Scan(&id, &selectedPassword); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return id, NotFound
+			return id, customErrors.NotFound
 		}
 
 		return id, err

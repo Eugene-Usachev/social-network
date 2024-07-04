@@ -3,11 +3,11 @@ package handler
 import (
 	"fmt"
 	"github.com/Eugene-Usachev/fst"
+	"github.com/Eugune-Usachev/social-network/src/internal/metrics"
+	"github.com/Eugune-Usachev/social-network/src/internal/service"
+	loggerpkg "github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"social-network/src/internal/metrics"
-	"social-network/src/internal/service"
-	loggerpkg "social-network/src/pkg/logger"
 	"time"
 )
 
@@ -72,11 +72,13 @@ func (handler *Handler) initRoutes() {
 
 	profileGroup := handler.router.Group("/profile")
 	{
-
+		profileGroup.GET("/:userId", handler.GetSmallProfile)
+		profileGroup.GET("/:userId/info", handler.GetInfo)
 	}
 	profileAuthGroup := handler.router.Group("/profile", handler.CheckAuth)
 	{
-
+		profileAuthGroup.PATCH("/small", handler.UpdateSmallProfile)
+		profileAuthGroup.PATCH("/info", handler.UpdateInfo)
 	}
 
 	metricsHandler := metrics.Handler()

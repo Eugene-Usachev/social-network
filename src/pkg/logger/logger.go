@@ -1,6 +1,6 @@
 package logger
 
-import "social-network/src/internal/config"
+import "github.com/Eugune-Usachev/social-network/src/internal/config"
 
 type Logger interface {
 	Info(msg string)

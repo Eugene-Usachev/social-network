@@ -5,13 +5,14 @@ import (
 	"fmt"
 	fb "github.com/Eugene-Usachev/fastbytes"
 	"github.com/Eugene-Usachev/fst"
-	"social-network/src/internal/config"
-	handlerpkg "social-network/src/internal/handler"
-	repositorypkg "social-network/src/internal/repository"
-	"social-network/src/internal/repository/postgres"
-	serverpkg "social-network/src/internal/server"
-	servicepkg "social-network/src/internal/service"
-	loggerpkg "social-network/src/pkg/logger"
+	"github.com/Eugune-Usachev/social-network/src/internal/config"
+	handlerpkg "github.com/Eugune-Usachev/social-network/src/internal/handler"
+	repositorypkg "github.com/Eugune-Usachev/social-network/src/internal/repository"
+	"github.com/Eugune-Usachev/social-network/src/internal/repository/cache"
+	"github.com/Eugune-Usachev/social-network/src/internal/repository/postgres"
+	serverpkg "github.com/Eugune-Usachev/social-network/src/internal/server"
+	servicepkg "github.com/Eugune-Usachev/social-network/src/internal/service"
+	loggerpkg "github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"strconv"
 	"time"
 )
@@ -37,7 +38,7 @@ func main() {
 		UserPass: cfg.PostgresPass(),
 		DBName:   cfg.PostgresDBName(),
 		SSLMode:  cfg.PostgresSSLMode(),
-	}, logger))
+	}, logger), cache.MustCreateRedisCache(cfg.RedisAddr(), cfg.RedisPassword(), logger), logger)
 	service := servicepkg.NewService(repository, accessTokenConverter, refreshTokenConverter)
 	handler := handlerpkg.NewHandler(service, accessTokenConverter, refreshTokenConverter, logger)
 	server := serverpkg.NewHTTPServer(handler, logger)

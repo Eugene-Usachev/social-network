@@ -2,11 +2,12 @@ package handler
 
 import (
 	"errors"
+	"github.com/Eugune-Usachev/social-network/src/customErrors"
+	"github.com/Eugune-Usachev/social-network/src/internal/repository"
+	"github.com/Eugune-Usachev/social-network/src/internal/service"
+	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"social-network/src/internal/model"
-	"social-network/src/internal/repository"
-	"social-network/src/internal/service"
 )
 
 func (handler *Handler) SingUp(ctx *gin.Context) {
@@ -24,7 +25,12 @@ func (handler *Handler) SingUp(ctx *gin.Context) {
 		return
 	}
 
-	id, accessToken, refreshToken, err = handler.service.Auth.SignUp(ctx, signUpModel)
+	if signUpModel.Email == "" || signUpModel.Password == "" || signUpModel.Name == "" || signUpModel.SecondName == "" {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	id, accessToken, refreshToken, err = handler.service.Auth.SignUp(ctx, &signUpModel)
 	if err != nil {
 		if errors.Is(err, service.EmailIsBusy) {
 			ctx.AbortWithStatus(http.StatusBadRequest)
@@ -56,9 +62,14 @@ func (handler *Handler) SignIn(ctx *gin.Context) {
 		return
 	}
 
+	if signInModel.Email == "" || signInModel.Password == "" {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
 	id, accessToken, refreshToken, err = handler.service.Auth.SignIn(ctx, signInModel.Email, signInModel.Password)
 	if err != nil {
-		if errors.Is(err, repository.NotFound) || errors.Is(err, repository.InvalidPassword) {
+		if errors.Is(err, customErrors.NotFound) || errors.Is(err, repository.InvalidPassword) {
 			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
@@ -87,7 +98,12 @@ func (handler *Handler) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err = handler.service.Auth.RefreshTokens(ctx, refreshModel.ID, refreshModel.Password)
+	if refreshModel.Id == -1 || refreshModel.Password == "" {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	accessToken, refreshToken, err = handler.service.Auth.RefreshTokens(ctx, int(refreshModel.Id), refreshModel.Password)
 	if err != nil {
 		if errors.Is(err, service.Unauthorized) {
 			ctx.AbortWithStatus(http.StatusUnauthorized)

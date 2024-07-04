@@ -4,8 +4,8 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"social-network/src/pkg/logger"
 	"time"
 )
 

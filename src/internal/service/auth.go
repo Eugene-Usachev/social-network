@@ -5,9 +5,9 @@ import (
 	"errors"
 	fb "github.com/Eugene-Usachev/fastbytes"
 	"github.com/Eugene-Usachev/fst"
-	"social-network/src/internal/metrics"
-	"social-network/src/internal/model"
-	"social-network/src/internal/repository"
+	"github.com/Eugune-Usachev/social-network/src/internal/metrics"
+	"github.com/Eugune-Usachev/social-network/src/internal/repository"
+	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 )
 
 type AuthService struct {
@@ -30,7 +30,7 @@ var (
 	EmailIsBusy = errors.New("email is busy")
 )
 
-func (authService AuthService) SignUp(ctx context.Context, model model.SignUp) (id int, accessToken, refreshToken string, err error) {
+func (authService AuthService) SignUp(ctx context.Context, model *model.SignUp) (id int, accessToken, refreshToken string, err error) {
 	isEmailBusy, err := authService.repository.Auth.IsEmailBusy(ctx, model.Email)
 	if err != nil {
 		return id, accessToken, refreshToken, err

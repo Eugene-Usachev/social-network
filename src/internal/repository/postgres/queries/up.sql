@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     name             VARCHAR(255)    NOT NULL,
     second_name      VARCHAR(255)    NOT NULL,
     email            VARCHAR(255)    NOT NULL UNIQUE,
+    description      VARCHAR(255)    default '',
     password         VARCHAR(255)    NOT NULL,
     friends          BIGINT []       default ARRAY[]::BIGINT[],
     subscribers      BIGINT []       default ARRAY[]::BIGINT[],
@@ -13,4 +14,6 @@ CREATE TABLE IF NOT EXISTS users (
     -- info is a jsonb field because info can be changed in the future and it's easier to keep it without a schema
     info             jsonb           default '{}',
     registered_at    TIMESTAMP       NOT NULL DEFAULT NOW()
-)
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);

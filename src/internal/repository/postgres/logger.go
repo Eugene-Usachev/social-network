@@ -3,8 +3,8 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/jackc/pgx/v5"
-	"social-network/src/pkg/logger"
 )
 
 type PostgresLogger struct {

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package profile;
+
+option go_package = "github.com/Eugune-Usachev/social-network/pkg/model;model";
+
+message SignUp {
+  string name = 1;
+  string second_name = 2;
+  string email = 3;
+  string password = 4;
+}
+
+message SignIn {
+  string email = 1;
+  string password = 2;
+}
+
+message RefreshTokens {
+  int32 id = 1;
+  string password = 2;
+}

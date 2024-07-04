@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package profile;
+
+option go_package = "github.com/Eugune-Usachev/social-network/pkg/model;model";
+
+message SmallProfile {
+  string name = 1;
+  string second_name = 2;
+  string avatar = 3;
+  string description = 4;
+  string birthday = 5;
+  int32 gender = 6;
+  string email = 7;
+}
+
+message UpdateSmallProfile {
+  string name = 1;
+  string second_name = 2;
+  string description = 3;
+  string birthday = 4;
+  int32 gender = 5;
+  string email = 6;
+}

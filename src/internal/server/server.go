@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
+	"github.com/Eugune-Usachev/social-network/src/internal/handler"
+	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"social-network/src/internal/handler"
-	"social-network/src/pkg/logger"
 	"time"
 )
 
