@@ -19,7 +19,7 @@ func NewPostgresLogger(logger logger.Logger) *PostgresLogger {
 
 func (l *PostgresLogger) TraceQueryStart(ctx context.Context, _ *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
 	if len(data.Args) > 0 {
-		l.logger.Info(fmt.Sprintf("%s, with args: %v\n", data.SQL, data.Args))
+		l.logger.Info(fmt.Sprintf("%s, with args: %v", data.SQL, data.Args))
 	} else {
 		l.logger.Info(data.SQL)
 	}

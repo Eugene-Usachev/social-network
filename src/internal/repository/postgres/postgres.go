@@ -51,10 +51,10 @@ func MustCreatePostgresDB(ctx context.Context, cfg Config, logger logger.Logger)
 		}
 
 		return nil
-	}, 20, 3*time.Second)
+	}, 20, 1*time.Second)
 
 	if err != nil {
-		logger.Fatal("Error do with tries postgresql")
+		logger.Fatal(fmt.Sprintf("Error do with tries postgresql: %s", err.Error()))
 	}
 
 	logger.Info("Creating tables for postgres")

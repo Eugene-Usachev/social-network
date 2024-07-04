@@ -6,3 +6,13 @@ type SignUp struct {
 	Email      string `json:"email" binding:"required"`
 	Password   string `json:"password" binding:"required"`
 }
+
+type SignIn struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type RefreshTokens struct {
+	ID       int    `json:"id" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}

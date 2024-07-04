@@ -33,7 +33,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=your_postgres_password
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=social_network
     networks:
       - common
 
@@ -90,12 +90,13 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=your_postgres_password
-      - POSTGRES_DB_NAME=postgres
+      - POSTGRES_SSL_MODE=disable
+      - POSTGRES_DB_NAME=social_network
       - REDIS_ADDRESS=redis:6379
       - REDIS_PASSWORD=your_redis_password
       - FST_ACCESS_KEY=your_fst_access_key
       - FST_REFRESH_KEY=your_fst_refresh_key
-      - METRICS_ADDRESS=prometheus:9090
+      - METRICS_ADDRESS=server:9090
     depends_on:
 #      elasticsearch:
 #        condition: service_started

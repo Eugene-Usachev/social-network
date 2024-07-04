@@ -24,6 +24,9 @@ func (authRepository AuthRepository) IsEmailBusy(ctx context.Context, email stri
 	const query = "SELECT TRUE FROM users WHERE email = $1"
 
 	if err = authRepository.postgres.QueryRow(ctx, query, email).Scan(&isExists); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
 		return false, err
 	}
 
