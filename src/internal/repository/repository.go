@@ -1,6 +1,17 @@
 package repository
 
-type Auth interface{}
+import (
+	"context"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"social-network/src/internal/model"
+)
+
+type Auth interface {
+	IsEmailBusy(ctx context.Context, email string) (isExists bool, err error)
+	SignUp(ctx context.Context, model model.SignUp) (id int, err error)
+	SignIn(ctx context.Context, email, password string) (id int, err error)
+	AuthenticateUser(ctx context.Context, id int, password string) (wasAuthenticated bool, err error)
+}
 
 type Profile interface{}
 
@@ -24,6 +35,8 @@ type Repository struct {
 	Post
 }
 
-func NewRepository() *Repository {
-	return &Repository{}
+func NewRepository(postgres *pgxpool.Pool) *Repository {
+	return &Repository{
+		Auth: NewAuthRepository(postgres),
+	}
 }

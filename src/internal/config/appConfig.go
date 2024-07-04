@@ -17,11 +17,12 @@ type AppConfig struct {
 	esUser string
 	esPass string
 
-	postgresHost   string
-	postgresPort   int
-	postgresUser   string
-	postgresPass   string
-	postgresDBName string
+	postgresHost    string
+	postgresPort    int
+	postgresUser    string
+	postgresPass    string
+	postgresDBName  string
+	postgresSSLMode string
 
 	redisAddr     string
 	redisPassword string
@@ -30,70 +31,6 @@ type AppConfig struct {
 
 	fstAccessKey  string
 	fstRefreshKey string
-}
-
-func (appConfig *AppConfig) IsProduction() bool {
-	return appConfig.isProduction
-}
-
-func (appConfig *AppConfig) Port() int {
-	return appConfig.port
-}
-
-func (appConfig *AppConfig) Host() string {
-	return appConfig.host
-}
-
-func (appConfig *AppConfig) EsAddr() []string {
-	return appConfig.esAddr
-}
-
-func (appConfig *AppConfig) EsUser() string {
-	return appConfig.esUser
-}
-
-func (appConfig *AppConfig) EsPass() string {
-	return appConfig.esPass
-}
-
-func (appConfig *AppConfig) PostgresHost() string {
-	return appConfig.postgresHost
-}
-
-func (appConfig *AppConfig) PostgresPort() int {
-	return appConfig.postgresPort
-}
-
-func (appConfig *AppConfig) PostgresUser() string {
-	return appConfig.postgresUser
-}
-
-func (appConfig *AppConfig) PostgresPass() string {
-	return appConfig.postgresPass
-}
-
-func (appConfig *AppConfig) PostgresDBName() string {
-	return appConfig.postgresDBName
-}
-
-func (appConfig *AppConfig) RedisAddr() string {
-	return appConfig.redisAddr
-}
-
-func (appConfig *AppConfig) RedisPassword() string {
-	return appConfig.redisPassword
-}
-
-func (appConfig *AppConfig) MetricsAddr() string {
-	return appConfig.metricsAddr
-}
-
-func (appConfig *AppConfig) FstAccessKey() string {
-	return appConfig.fstAccessKey
-}
-
-func (appConfig *AppConfig) FstRefreshKey() string {
-	return appConfig.fstRefreshKey
 }
 
 func MustNewConfig() *AppConfig {
@@ -188,6 +125,13 @@ func MustNewConfig() *AppConfig {
 		log.Fatal("POSTGRES_DATABASE is not set")
 	}
 
+	postgresSSLMode := os.Getenv("POSTGRES_SSL_MODE")
+	if postgresSSLMode != "" {
+		c.postgresSSLMode = postgresSSLMode
+	} else {
+		log.Fatal("POSTGRES_SSL_MODE is not set")
+	}
+
 	redisAddr := os.Getenv("REDIS_ADDRESS")
 	if redisAddr != "" {
 		c.redisAddr = redisAddr
@@ -224,4 +168,70 @@ func MustNewConfig() *AppConfig {
 	}
 
 	return c
+}
+
+func (appConfig *AppConfig) IsProduction() bool {
+	return appConfig.isProduction
+}
+
+func (appConfig *AppConfig) Port() int {
+	return appConfig.port
+}
+
+func (appConfig *AppConfig) Host() string {
+	return appConfig.host
+}
+
+func (appConfig *AppConfig) EsAddr() []string {
+	return appConfig.esAddr
+}
+
+func (appConfig *AppConfig) EsUser() string {
+	return appConfig.esUser
+}
+
+func (appConfig *AppConfig) EsPass() string {
+	return appConfig.esPass
+}
+
+func (appConfig *AppConfig) PostgresHost() string {
+	return appConfig.postgresHost
+}
+
+func (appConfig *AppConfig) PostgresPort() int {
+	return appConfig.postgresPort
+}
+
+func (appConfig *AppConfig) PostgresUser() string {
+	return appConfig.postgresUser
+}
+
+func (appConfig *AppConfig) PostgresPass() string {
+	return appConfig.postgresPass
+}
+
+func (appConfig *AppConfig) PostgresDBName() string {
+	return appConfig.postgresDBName
+}
+
+func (appConfig *AppConfig) PostgresSSLMode() string { return appConfig.postgresSSLMode }
+
+func (appConfig *AppConfig) RedisAddr() string {
+	return appConfig.redisAddr
+}
+
+func (appConfig *AppConfig) RedisPassword() string {
+	return appConfig.redisPassword
+}
+
+func (appConfig *AppConfig) MetricsAddr() string {
+	return appConfig.metricsAddr
+}
+
+func (appConfig *AppConfig) FstAccessKey() string {
+	return appConfig.fstAccessKey
+}
+
+func (appConfig *AppConfig) FstRefreshKey() string {
+	return appConfig.fstRefreshKey
 }
