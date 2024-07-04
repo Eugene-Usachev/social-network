@@ -70,6 +70,15 @@ func (handler *Handler) initRoutes() {
 		authGroup.POST("/refresh-tokens", handler.Refresh)
 	}
 
+	profileGroup := handler.router.Group("/profile")
+	{
+
+	}
+	profileAuthGroup := handler.router.Group("/profile", handler.CheckAuth)
+	{
+
+	}
+
 	metricsHandler := metrics.Handler()
 	handler.router.GET("/metrics", func(ctx *gin.Context) {
 		metricsHandler.ServeHTTP(ctx.Writer, ctx.Request)
