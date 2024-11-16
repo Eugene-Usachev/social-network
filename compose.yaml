@@ -4,7 +4,7 @@ services:
 #    environment:
 #      - discovery.type=single-node
 #      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-#      - ELASTIC_PASSWORD=your_elastic_password
+#      - ELASTIC_PASSWORD=${ES_PASSWORD}
 #      - bootstrap.memory_lock=true
 #      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
 #    ulimits:
@@ -18,7 +18,7 @@ services:
 #    networks:
 #      - common
 #    healthcheck:
-#      test: [ "CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'" ]
+#      test: [ "CMD-SHELL", "curl -s ${ES_CLUSTER_URL}/_cluster/health | grep -vq '\"status\":\"red\"'" ]
 #      interval: 1s
 #      timeout: 1s
 #      retries: 50
@@ -32,9 +32,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=your_postgres_password
-      - POSTGRES_DB=social_network
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
     networks:
       - common
 
@@ -82,25 +82,24 @@ services:
     networks:
       - common
     ports:
-      - 4040:4040
+      - "${APP_PORT}:${APP_PORT}"
     environment:
-      - PORT=4040
-      - HOST=server
-      - IS_PRODUCTION=false
-      - ES_ADDRESSES=["http://elasticsearch:9200"]
-      - ES_USERNAME=elastic
-      - ES_PASSWORD=your_elastic_password
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=your_postgres_password
-      - POSTGRES_SSL_MODE=disable
-      - POSTGRES_DB_NAME=social_network
-      - REDIS_ADDRESS=redis:6379
-      - REDIS_PASSWORD=your_redis_password
+      - PORT=${APP_PORT}
+      - HOST=${APP_HOST}
+      - IS_PRODUCTION=${APP_IS_PRODUCTION}
       - FST_ACCESS_KEY=your_fst_access_key
       - FST_REFRESH_KEY=your_fst_refresh_key
-      - METRICS_ADDRESS=server:9090
+      - ES_ADDRESSES=${ES_ADDRESSES}
+      - ES_USERNAME=${ES_USERNAME}
+      - ES_PASSWORD=${ES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USERNAME=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_SSL_MODE=${POSTGRES_SSL_MODE}
+      - POSTGRES_DB_NAME=${POSTGRES_DB_NAME}
+      - REDIS_ADDRESS=${REDIS_HOST}:${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     depends_on:
 #      elasticsearch:
 #        condition: service_started
