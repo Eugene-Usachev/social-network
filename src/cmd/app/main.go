@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	fb "github.com/Eugene-Usachev/fastbytes"
 	"github.com/Eugene-Usachev/fst"
 	"github.com/Eugune-Usachev/social-network/src/internal/config"
@@ -13,8 +16,6 @@ import (
 	serverpkg "github.com/Eugune-Usachev/social-network/src/internal/server"
 	servicepkg "github.com/Eugune-Usachev/social-network/src/internal/service"
 	loggerpkg "github.com/Eugune-Usachev/social-network/src/pkg/logger"
-	"strconv"
-	"time"
 )
 
 func main() {

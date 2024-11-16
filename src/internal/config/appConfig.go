@@ -1,11 +1,12 @@
 package config
 
 import (
-	fb "github.com/Eugene-Usachev/fastbytes"
-	"github.com/goccy/go-json"
 	"log"
 	"os"
 	"strconv"
+
+	fb "github.com/Eugene-Usachev/fastbytes"
+	"github.com/goccy/go-json"
 )
 
 type AppConfig struct {
@@ -40,19 +41,23 @@ func MustNewConfig() *AppConfig {
 		c.isProduction, _ = strconv.ParseBool(isProduction)
 	} else {
 		isValid = false
+
 		log.Println("IS_PRODUCTION is not set")
 	}
 
 	port := os.Getenv("PORT")
 	if port != "" {
 		var err error
+
 		c.port, err = strconv.Atoi(port)
 		if err != nil {
 			isValid = false
+
 			log.Println("Failed to parse PORT: ", err)
 		}
 	} else {
 		isValid = false
+
 		log.Println("PORT is not set")
 	}
 
@@ -61,6 +66,7 @@ func MustNewConfig() *AppConfig {
 		c.host = host
 	} else {
 		isValid = false
+
 		log.Println("HOST is not set")
 	}
 
@@ -69,11 +75,14 @@ func MustNewConfig() *AppConfig {
 		var addresses []string
 		if err := json.Unmarshal(fb.S2B(esAddresses), &addresses); err != nil {
 			isValid = false
+
 			log.Println("Failed to unmarshal ES_ADDRESSES: ", err)
 		}
+
 		c.esAddr = addresses
 	} else {
 		isValid = false
+
 		log.Println("ES_ADDR is not set")
 	}
 
@@ -82,6 +91,7 @@ func MustNewConfig() *AppConfig {
 		c.esUser = esUser
 	} else {
 		isValid = false
+
 		log.Println("ES_USERNAME is not set")
 	}
 
@@ -90,6 +100,7 @@ func MustNewConfig() *AppConfig {
 		c.esPass = esPass
 	} else {
 		isValid = false
+
 		log.Println("ES_PASSWORD is not set")
 	}
 
@@ -98,19 +109,23 @@ func MustNewConfig() *AppConfig {
 		c.postgresHost = postgresHost
 	} else {
 		isValid = false
+
 		log.Println("POSTGRES_HOST is not set")
 	}
 
 	postgresPort := os.Getenv("POSTGRES_PORT")
 	if postgresPort != "" {
 		var err error
+
 		c.postgresPort, err = strconv.Atoi(postgresPort)
 		if err != nil {
 			isValid = false
+
 			log.Println("POSTGRES_PORT is not a number")
 		}
 	} else {
 		isValid = false
+
 		log.Println("POSTGRES_PORT is not set")
 	}
 
@@ -119,6 +134,7 @@ func MustNewConfig() *AppConfig {
 		c.postgresUser = postgresUser
 	} else {
 		isValid = false
+
 		log.Println("POSTGRES_USERNAME is not set")
 	}
 
@@ -127,6 +143,7 @@ func MustNewConfig() *AppConfig {
 		c.postgresPass = postgresPass
 	} else {
 		isValid = false
+
 		log.Println("POSTGRES_PASSWORD is not set")
 	}
 
@@ -135,6 +152,7 @@ func MustNewConfig() *AppConfig {
 		c.postgresDBName = postgresDBName
 	} else {
 		isValid = false
+
 		log.Println("POSTGRES_DATABASE is not set")
 	}
 
@@ -143,6 +161,7 @@ func MustNewConfig() *AppConfig {
 		c.postgresSSLMode = postgresSSLMode
 	} else {
 		isValid = false
+
 		log.Println("POSTGRES_SSL_MODE is not set")
 	}
 
@@ -151,6 +170,7 @@ func MustNewConfig() *AppConfig {
 		c.redisAddr = redisAddr
 	} else {
 		isValid = false
+
 		log.Println("REDIS_ADDRESS is not set")
 	}
 
@@ -159,6 +179,7 @@ func MustNewConfig() *AppConfig {
 		c.redisPassword = redisPort
 	} else {
 		isValid = false
+
 		log.Println("REDIS_PORT is not set")
 	}
 
@@ -167,6 +188,7 @@ func MustNewConfig() *AppConfig {
 		c.fstAccessKey = fstAccessKey
 	} else {
 		isValid = false
+
 		log.Println("FST_ACCESS_KEY is not set")
 	}
 
@@ -175,6 +197,7 @@ func MustNewConfig() *AppConfig {
 		c.fstRefreshKey = fstRefreshKey
 	} else {
 		isValid = false
+
 		log.Println("FST_REFRESH_KEY is not set")
 	}
 

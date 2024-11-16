@@ -1,13 +1,14 @@
 package metrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"strconv"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// HTTP requests summary (duration in seconds, method, path, status code)
+// HTTP requests summary (duration in seconds, method, path, status code).
 var httpRequestsMetrics = promauto.NewSummaryVec(prometheus.SummaryOpts{
 	Namespace: "social_network",
 	Name:      "http_requests",
@@ -19,7 +20,7 @@ var httpRequestsMetrics = promauto.NewSummaryVec(prometheus.SummaryOpts{
 	},
 }, []string{"method", "path", "status_code"})
 
-// ObserveRequest reports an HTTP request summary (duration in seconds, method, path, status code)
+// ObserveRequest reports an HTTP request summary (duration in seconds, method, path, status code).
 func ObserveRequest(duration time.Duration, method string, path string, status int) {
 	httpRequestsMetrics.WithLabelValues(method, path, strconv.Itoa(status)).Observe(duration.Seconds())
 }

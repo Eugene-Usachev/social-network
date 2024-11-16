@@ -255,7 +255,7 @@ var file_model_profile_proto_goTypes = []interface{}{
 	(*SmallProfile)(nil),       // 0: profile.SmallProfile
 	(*UpdateSmallProfile)(nil), // 1: profile.UpdateSmallProfile
 }
-var file_model_profile_proto_depIdxs = []int32{
+var file_model_profile_proto_depIDxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -305,11 +305,11 @@ func file_model_profile_proto_init() {
 			NumServices:   0,
 		},
 		GoTypes:           file_model_profile_proto_goTypes,
-		DependencyIndexes: file_model_profile_proto_depIdxs,
+		DependencyIndexes: file_model_profile_proto_depIDxs,
 		MessageInfos:      file_model_profile_proto_msgTypes,
 	}.Build()
 	File_model_profile_proto = out.File
 	file_model_profile_proto_rawDesc = nil
 	file_model_profile_proto_goTypes = nil
-	file_model_profile_proto_depIdxs = nil
+	file_model_profile_proto_depIDxs = nil
 }

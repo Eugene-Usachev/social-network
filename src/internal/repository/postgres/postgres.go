@@ -4,9 +4,10 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"time"
+
 	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"time"
 )
 
 type Config struct {
@@ -24,6 +25,7 @@ func MustCreatePostgresDB(ctx context.Context, cfg Config, logger logger.Logger)
 		err    error
 		config *pgxpool.Config
 	)
+
 	url := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", cfg.UserName, cfg.UserPass, cfg.Host, cfg.Port, cfg.DBName)
 
 	err = doWithTries(func() error {
@@ -41,6 +43,7 @@ func MustCreatePostgresDB(ctx context.Context, cfg Config, logger logger.Logger)
 		}
 
 		config.ConnConfig.Tracer = NewPostgresLogger(logger)
+
 		pool, err = pgxpool.NewWithConfig(ctx1, config)
 		if err != nil {
 			return err
@@ -52,12 +55,12 @@ func MustCreatePostgresDB(ctx context.Context, cfg Config, logger logger.Logger)
 
 		return nil
 	}, 20, 1*time.Second)
-
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Error do with tries postgresql: %s", err.Error()))
 	}
 
 	logger.Info("Creating tables for postgres")
+
 	err = createTablesAndIndexes(ctx, pool)
 	if err != nil {
 		logger.Fatal(err.Error())
@@ -73,18 +76,24 @@ var upQuery string
 
 func createTablesAndIndexes(ctx context.Context, pool *pgxpool.Pool) error {
 	_, err := pool.Exec(ctx, upQuery)
+
 	return err
 }
 
-func doWithTries(fn func() error, attempts uint8, delay time.Duration) (err error) {
+func doWithTries(fn func() error, attempts uint8, delay time.Duration) error {
+	var err error
+
 	for attempts > 0 {
 		if err = fn(); err != nil {
 			time.Sleep(delay)
+
 			attempts--
 
 			continue
 		}
+
 		return nil
 	}
+
 	return err
 }

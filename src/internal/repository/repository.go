@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/Eugune-Usachev/social-network/src/internal/repository/cache"
 	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/Eugune-Usachev/social-network/src/pkg/model"

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/Eugene-Usachev/fst"
 	"github.com/Eugune-Usachev/social-network/src/internal/repository"
 	"github.com/Eugune-Usachev/social-network/src/pkg/model"
@@ -40,7 +41,11 @@ type Service struct {
 	Post
 }
 
-func NewService(repository *repository.Repository, accessConverter *fst.EncodedConverter, refreshConverter *fst.EncodedConverter) *Service {
+func NewService(
+	repository *repository.Repository,
+	accessConverter *fst.EncodedConverter,
+	refreshConverter *fst.EncodedConverter,
+) *Service {
 	return &Service{
 		Auth:    NewAuthService(repository, accessConverter, refreshConverter),
 		Profile: NewProfileService(repository),

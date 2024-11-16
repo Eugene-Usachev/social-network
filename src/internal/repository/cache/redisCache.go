@@ -3,10 +3,11 @@ package cache
 import (
 	"context"
 	"fmt"
+	"time"
+
 	fb "github.com/Eugene-Usachev/fastbytes"
 	loggerpkg "github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/redis/rueidis"
-	"time"
 )
 
 type RedisCache struct {
@@ -19,6 +20,15 @@ const (
 	negativeCaseDurationSeconds = 300
 )
 
+func isExistsError(err error) bool {
+	redisErr, isRedisErr := rueidis.IsRedisErr(err)
+	if !isRedisErr {
+		return false
+	}
+
+	return redisErr.IsNil()
+}
+
 func MustCreateRedisCache(addr, password string, logger loggerpkg.Logger) *RedisCache {
 	client, err := rueidis.NewClient(rueidis.ClientOption{
 		InitAddress:   []string{addr},
@@ -26,7 +36,6 @@ func MustCreateRedisCache(addr, password string, logger loggerpkg.Logger) *Redis
 		SelectDB:      0,
 		MaxFlushDelay: 100 * time.Microsecond,
 	})
-
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Error occurred when creating redis client: %s", err.Error()))
 	}
@@ -42,41 +51,81 @@ var _ Cache = (*RedisCache)(nil)
 func (cache *RedisCache) IsNegativeCase(ctx context.Context, key string) bool {
 	res, err := cache.client.Do(ctx, cache.client.B().Exists().Key(key).Build()).AsBool()
 	if err != nil {
-		cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when checking negative case by key: %s, error: %s", key, err.Error()))
+		if !isExistsError(err) {
+			cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when getting string by key: %s, error: %s", key, err.Error()))
+		}
+
 		return false
 	}
+
 	return res
 }
 
 func (cache *RedisCache) GetString(ctx context.Context, key string) (string, bool) {
-	panic("TODO")
-	//return cache.client.Do(ctx, cache.client.B().Get().Key(key).Build()).ToString()
+	res, err := cache.client.Do(ctx, cache.client.B().Get().Key(key).Build()).ToString()
+	if err != nil {
+		if !isExistsError(err) {
+			cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when getting string by key: %s, error: %s", key, err.Error()))
+		}
+
+		return "", false
+	}
+
+	return res, true
 }
 
 func (cache *RedisCache) GetBytes(ctx context.Context, key string) ([]byte, bool) {
-	panic("TODO")
-	//return cache.client.Do(ctx, cache.client.B().Get().Key(key).Build()).AsBytes()
+	res, err := cache.client.Do(ctx, cache.client.B().Get().Key(key).Build()).AsBytes()
+	if err != nil {
+		if !isExistsError(err) {
+			cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when getting string by key: %s, error: %s", key, err.Error()))
+		}
+
+		return nil, false
+	}
+
+	return res, true
 }
 
 func (cache *RedisCache) SetString(ctx context.Context, key string, value string) {
-	if err := cache.client.Do(ctx, cache.client.B().Set().Key(key).Value(value).ExSeconds(cacheDurationSeconds).Build()).Error(); err != nil {
-		cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when setting string by key: %s, error: %s", key, err.Error()))
+	if err := cache.client.Do(
+		ctx,
+		cache.client.B().Set().Key(key).Value(value).ExSeconds(cacheDurationSeconds).Build(),
+	).Error(); err != nil {
+		cache.logger.Error(fmt.Sprintf(
+			"[Redis] Error occurred when setting string by key: %s, error: %s",
+			key,
+			err.Error(),
+		))
 	}
-	return
 }
 
 func (cache *RedisCache) SetBytes(ctx context.Context, key string, value []byte) {
-	if err := cache.client.Do(ctx, cache.client.B().Set().Key(key).Value(fb.B2S(value)).ExSeconds(cacheDurationSeconds).Build()).Error(); err != nil {
-		cache.logger.Error(fmt.Sprintf("[Redis]  Erroroccurred when setting bytes by key: %s, error: %s", key, err.Error()))
+	if err := cache.client.Do(
+		ctx,
+		cache.client.B().Set().Key(key).Value(fb.B2S(value)).ExSeconds(cacheDurationSeconds).Build(),
+	).Error(); err != nil {
+		cache.logger.Error(
+			fmt.Sprintf(
+				"[Redis]  Erroroccurred when setting bytes by key: %s, error: %s",
+				key, err.Error(),
+			),
+		)
 	}
-	return
 }
 
 func (cache *RedisCache) SetNegativeCase(ctx context.Context, key string) {
-	if err := cache.client.Do(ctx, cache.client.B().Set().Key(key).Value("").ExSeconds(negativeCaseDurationSeconds).Build()).Error(); err != nil {
-		cache.logger.Error(fmt.Sprintf("[Redis]  Erroroccurred when setting negative case by key: %s, error: %s", key, err.Error()))
+	if err := cache.client.Do(
+		ctx,
+		cache.client.B().Set().Key(key).Value("").ExSeconds(negativeCaseDurationSeconds).Build(),
+	).Error(); err != nil {
+		cache.logger.Error(
+			fmt.Sprintf(
+				"[Redis]  Erroroccurred when setting negative case by key: %s, error: %s",
+				key, err.Error(),
+			),
+		)
 	}
-	return
 }
 
 func (cache *RedisCache) Delete(ctx context.Context, key string) error {

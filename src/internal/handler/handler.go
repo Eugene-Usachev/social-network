@@ -2,13 +2,14 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/Eugene-Usachev/fst"
 	"github.com/Eugune-Usachev/social-network/src/internal/metrics"
 	"github.com/Eugune-Usachev/social-network/src/internal/service"
 	loggerpkg "github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"time"
 )
 
 type Handler struct {
@@ -54,7 +55,9 @@ func (handler *Handler) recover(ctx *gin.Context) {
 
 func (handler *Handler) metrics(ctx *gin.Context) {
 	startTime := time.Now()
+
 	ctx.Next()
+
 	elapsed := time.Since(startTime)
 	method := ctx.Request.Method
 	path := ctx.Request.URL.Path
@@ -67,6 +70,7 @@ func (handler *Handler) metrics(ctx *gin.Context) {
 			),
 		)
 	}
+
 	metrics.ObserveRequest(elapsed, method, path, statusCode)
 }
 
@@ -80,9 +84,10 @@ func (handler *Handler) initRoutes() {
 
 	profileGroup := handler.router.Group("/profile")
 	{
-		profileGroup.GET("/:userId", handler.GetSmallProfile)
-		profileGroup.GET("/:userId/info", handler.GetInfo)
+		profileGroup.GET("/:userID", handler.GetSmallProfile)
+		profileGroup.GET("/:userID/info", handler.GetInfo)
 	}
+
 	profileAuthGroup := handler.router.Group("/profile", handler.CheckAuth)
 	{
 		profileAuthGroup.PATCH("/small", handler.UpdateSmallProfile)
@@ -90,6 +95,7 @@ func (handler *Handler) initRoutes() {
 	}
 
 	metricsHandler := metrics.Handler()
+
 	handler.router.GET("/metrics", func(ctx *gin.Context) {
 		metricsHandler.ServeHTTP(ctx.Writer, ctx.Request)
 	})

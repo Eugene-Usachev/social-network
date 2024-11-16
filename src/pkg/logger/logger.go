@@ -12,5 +12,6 @@ func MustCreateLogger(isProduction bool, appConfig *config.AppConfig) Logger {
 	if isProduction {
 		return MustCreateElasticSearchLogger(appConfig.EsAddr(), appConfig.EsUser(), appConfig.EsPass())
 	}
+
 	return NewZeroLogger()
 }

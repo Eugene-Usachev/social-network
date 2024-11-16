@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/Eugune-Usachev/social-network/src/internal/handler"
 	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"time"
 )
 
 type HTTPServer struct {
@@ -27,9 +28,10 @@ func (server *HTTPServer) MustStart(addr string, isProduction bool) {
 	}
 
 	httpServer := http.Server{
-		Handler:     server.handler.Handler(),
-		Addr:        addr,
-		IdleTimeout: time.Minute,
+		Handler:           server.handler.Handler(),
+		Addr:              addr,
+		IdleTimeout:       time.Minute,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	server.logger.Info(fmt.Sprintf("Starting HTTP server on %s", addr))

@@ -2,12 +2,12 @@ package handler
 
 import (
 	"errors"
-	"github.com/Eugune-Usachev/social-network/src/customErrors"
+	"net/http"
+
 	"github.com/Eugune-Usachev/social-network/src/internal/repository"
 	"github.com/Eugune-Usachev/social-network/src/internal/service"
 	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (handler *Handler) SingUp(ctx *gin.Context) {
@@ -22,21 +22,30 @@ func (handler *Handler) SingUp(ctx *gin.Context) {
 	err = ctx.BindJSON(&signUpModel)
 	if err != nil {
 		handler.AbortWithError(ctx, http.StatusBadRequest, err)
+
 		return
 	}
 
-	if signUpModel.Email == "" || signUpModel.Password == "" || signUpModel.Name == "" || signUpModel.SecondName == "" {
+	isValidRequest := signUpModel.GetEmail() == "" ||
+		signUpModel.GetPassword() == "" ||
+		signUpModel.GetName() == "" ||
+		signUpModel.GetSecondName() == ""
+	if !isValidRequest {
 		ctx.AbortWithStatus(http.StatusBadRequest)
+
 		return
 	}
 
 	id, accessToken, refreshToken, err = handler.service.Auth.SignUp(ctx, &signUpModel)
 	if err != nil {
-		if errors.Is(err, service.EmailIsBusy) {
+		if errors.Is(err, service.ErrEmailIsBusy) {
 			ctx.AbortWithStatus(http.StatusBadRequest)
+
 			return
 		}
+
 		handler.AbortWithError(ctx, http.StatusInternalServerError, err)
+
 		return
 	}
 
@@ -59,21 +68,30 @@ func (handler *Handler) SignIn(ctx *gin.Context) {
 	err = ctx.BindJSON(&signInModel)
 	if err != nil {
 		handler.AbortWithError(ctx, http.StatusBadRequest, err)
+
 		return
 	}
 
-	if signInModel.Email == "" || signInModel.Password == "" {
+	if signInModel.GetEmail() == "" || signInModel.GetPassword() == "" {
 		ctx.AbortWithStatus(http.StatusBadRequest)
+
 		return
 	}
 
-	id, accessToken, refreshToken, err = handler.service.Auth.SignIn(ctx, signInModel.Email, signInModel.Password)
+	id, accessToken, refreshToken, err = handler.service.Auth.SignIn(
+		ctx,
+		signInModel.GetEmail(),
+		signInModel.GetPassword(),
+	)
 	if err != nil {
-		if errors.Is(err, customErrors.NotFound) || errors.Is(err, repository.InvalidPassword) {
+		if errors.Is(err, repository.ErrNotFound) || errors.Is(err, repository.ErrInvalidPassword) {
 			ctx.AbortWithStatus(http.StatusBadRequest)
+
 			return
 		}
+
 		handler.AbortWithError(ctx, http.StatusInternalServerError, err)
+
 		return
 	}
 
@@ -95,21 +113,30 @@ func (handler *Handler) RefreshTokens(ctx *gin.Context) {
 	err = ctx.BindJSON(&refreshModel)
 	if err != nil {
 		handler.AbortWithError(ctx, http.StatusBadRequest, err)
+
 		return
 	}
 
-	if refreshModel.Id == -1 || refreshModel.Password == "" {
+	if refreshModel.GetID() == -1 || refreshModel.GetPassword() == "" {
 		ctx.AbortWithStatus(http.StatusBadRequest)
+
 		return
 	}
 
-	accessToken, refreshToken, err = handler.service.Auth.RefreshTokens(ctx, int(refreshModel.Id), refreshModel.Password)
+	accessToken, refreshToken, err = handler.service.Auth.RefreshTokens(
+		ctx,
+		int(refreshModel.GetID()),
+		refreshModel.GetPassword(),
+	)
 	if err != nil {
-		if errors.Is(err, service.Unauthorized) {
+		if errors.Is(err, service.ErrUnauthorized) {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
+
 			return
 		}
+
 		handler.AbortWithError(ctx, http.StatusInternalServerError, err)
+
 		return
 	}
 

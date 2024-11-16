@@ -151,7 +151,7 @@ type RefreshTokens struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id       int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ID       int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 }
 
@@ -187,9 +187,9 @@ func (*RefreshTokens) Descriptor() ([]byte, []int) {
 	return file_model_auth_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *RefreshTokens) GetId() int32 {
+func (x *RefreshTokens) GetID() int32 {
 	if x != nil {
-		return x.Id
+		return x.ID
 	}
 	return 0
 }
@@ -245,7 +245,7 @@ var file_model_auth_proto_goTypes = []interface{}{
 	(*SignIn)(nil),        // 1: profile.SignIn
 	(*RefreshTokens)(nil), // 2: profile.RefreshTokens
 }
-var file_model_auth_proto_depIdxs = []int32{
+var file_model_auth_proto_depIDxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -307,11 +307,11 @@ func file_model_auth_proto_init() {
 			NumServices:   0,
 		},
 		GoTypes:           file_model_auth_proto_goTypes,
-		DependencyIndexes: file_model_auth_proto_depIdxs,
+		DependencyIndexes: file_model_auth_proto_depIDxs,
 		MessageInfos:      file_model_auth_proto_msgTypes,
 	}.Build()
 	File_model_auth_proto = out.File
 	file_model_auth_proto_rawDesc = nil
 	file_model_auth_proto_goTypes = nil
-	file_model_auth_proto_depIdxs = nil
+	file_model_auth_proto_depIDxs = nil
 }
