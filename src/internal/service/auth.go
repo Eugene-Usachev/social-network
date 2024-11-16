@@ -5,7 +5,6 @@ import (
 	"errors"
 	fb "github.com/Eugene-Usachev/fastbytes"
 	"github.com/Eugene-Usachev/fst"
-	"github.com/Eugune-Usachev/social-network/src/internal/metrics"
 	"github.com/Eugune-Usachev/social-network/src/internal/repository"
 	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 )
@@ -47,8 +46,6 @@ func (authService AuthService) SignUp(ctx context.Context, model *model.SignUp) 
 
 	accessToken = authService.accessConverter.NewToken(fb.I2B(id))
 	refreshToken = authService.refreshConverter.NewToken(fb.S2B(model.Password))
-
-	metrics.IncUserRegistrations()
 
 	return id, accessToken, refreshToken, nil
 }

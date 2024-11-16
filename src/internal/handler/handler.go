@@ -12,6 +12,7 @@ import (
 )
 
 type Handler struct {
+	isProduction          bool
 	router                *gin.Engine
 	logger                loggerpkg.Logger
 	service               *service.Service
@@ -20,12 +21,14 @@ type Handler struct {
 }
 
 func NewHandler(
+	isProduction bool,
 	service *service.Service,
 	accessTokenConverter *fst.EncodedConverter,
 	refreshTokenConverter *fst.EncodedConverter,
 	logger loggerpkg.Logger,
 ) *Handler {
 	handler := &Handler{
+		isProduction:          isProduction,
 		service:               service,
 		logger:                logger,
 		accessTokenConverter:  accessTokenConverter,
@@ -56,9 +59,14 @@ func (handler *Handler) metrics(ctx *gin.Context) {
 	method := ctx.Request.Method
 	path := ctx.Request.URL.Path
 	statusCode := ctx.Writer.Status()
-	handler.logger.Info(fmt.Sprintf(
-		"http request | %-7s | %-21s | %d | %-9d microseconds",
-		method, path, statusCode, elapsed.Microseconds()))
+
+	if !handler.isProduction {
+		handler.logger.Info(
+			fmt.Sprintf("http request | %-7s | %-21s | %d | %-9d microseconds",
+				method, path, statusCode, elapsed.Microseconds(),
+			),
+		)
+	}
 	metrics.ObserveRequest(elapsed, method, path, statusCode)
 }
 
