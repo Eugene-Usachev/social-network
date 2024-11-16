@@ -28,7 +28,7 @@ func MustCreateRedisCache(addr, password string, logger loggerpkg.Logger) *Redis
 	})
 
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("Error occurred when creating client: %s", err.Error()))
+		logger.Fatal(fmt.Sprintf("Error occurred when creating redis client: %s", err.Error()))
 	}
 
 	return &RedisCache{

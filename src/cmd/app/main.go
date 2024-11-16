@@ -40,7 +40,7 @@ func main() {
 		SSLMode:  cfg.PostgresSSLMode(),
 	}, logger), cache.MustCreateRedisCache(cfg.RedisAddr(), cfg.RedisPassword(), logger), logger)
 	service := servicepkg.NewService(repository, accessTokenConverter, refreshTokenConverter)
-	handler := handlerpkg.NewHandler(service, accessTokenConverter, refreshTokenConverter, logger)
+	handler := handlerpkg.NewHandler(cfg.IsProduction(), service, accessTokenConverter, refreshTokenConverter, logger)
 	server := serverpkg.NewHTTPServer(handler, logger)
 
 	server.MustStart(fmt.Sprintf("%s:%d", cfg.Host(), cfg.Port()), cfg.IsProduction())

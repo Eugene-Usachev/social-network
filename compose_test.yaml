@@ -4,7 +4,7 @@ services:
 #    environment:
 #      - discovery.type=single-node
 #      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-#      - ELASTIC_PASSWORD=${ES_PASSWORD}
+#      - ELASTIC_PASSWORD=test
 #      - bootstrap.memory_lock=true
 #      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
 #    ulimits:
@@ -18,7 +18,7 @@ services:
 #    networks:
 #      - common
 #    healthcheck:
-#      test: [ "CMD-SHELL", "curl -s ${ES_CLUSTER_URL}/_cluster/health | grep -vq '\"status\":\"red\"'" ]
+#      test: [ "CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'" ]
 #      interval: 1s
 #      timeout: 1s
 #      retries: 50
@@ -32,9 +32,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB_NAME}
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test
     networks:
       - common
 
@@ -48,7 +48,7 @@ services:
       - "6379:6379"
     command:
       - --maxmemory 256MB
-      - --requirepass your_redis_password
+      - --requirepass test
     networks:
       - common
 
@@ -83,24 +83,24 @@ services:
     networks:
       - common
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "4040:4040"
     environment:
-      - PORT=${APP_PORT}
-      - HOST=${APP_HOST}
-      - IS_PRODUCTION=${APP_IS_PRODUCTION}
-      - FST_ACCESS_KEY=${FST_ACCESS_KEY}
-      - FST_REFRESH_KEY=${FST_REFRESH_KEY}
-      - ES_ADDRESSES=${ES_ADDRESSES}
-      - ES_USERNAME=${ES_USERNAME}
-      - ES_PASSWORD=${ES_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_USERNAME=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_SSL_MODE=${POSTGRES_SSL_MODE}
-      - POSTGRES_DB_NAME=${POSTGRES_DB_NAME}
-      - REDIS_ADDRESS=${REDIS_HOST}:${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - PORT=4040
+      - HOST=server
+      - IS_PRODUCTION=test
+      - FST_ACCESS_KEY=test
+      - FST_REFRESH_KEY=test
+      - ES_ADDRESSES=["http://elasticsearch:9200"]
+      - ES_USERNAME=test
+      - ES_PASSWORD=test
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USERNAME=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_SSL_MODE=disable
+      - POSTGRES_DB_NAME=test
+      - REDIS_ADDRESS=redis:6379
+      - REDIS_PASSWORD=test
     depends_on:
 #      elasticsearch:
 #        condition: service_started
@@ -110,6 +110,18 @@ services:
         condition: service_started
       prometheus:
         condition: service_started
+
+  api_test:
+    build:
+      context: ./test_api
+      dockerfile: Dockerfile_test
+    networks:
+      - common
+    environment:
+      - PORT=${APP_PORT}
+      - HOST=server
+    depends_on:
+      - server
 networks:
   common:
     driver: bridge

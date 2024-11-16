@@ -75,7 +75,7 @@ func (handler *Handler) initRoutes() {
 	{
 		authGroup.POST("/sign-up", handler.SingUp)
 		authGroup.POST("/sign-in", handler.SignIn)
-		authGroup.POST("/refresh-tokens", handler.Refresh)
+		authGroup.POST("/refresh-tokens", handler.RefreshTokens)
 	}
 
 	profileGroup := handler.router.Group("/profile")

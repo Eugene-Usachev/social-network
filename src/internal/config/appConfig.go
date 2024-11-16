@@ -61,7 +61,7 @@ func MustNewConfig() *AppConfig {
 		c.host = host
 	} else {
 		isValid = false
-		log.Println("PORT is not set")
+		log.Println("HOST is not set")
 	}
 
 	esAddresses := os.Getenv("ES_ADDRESSES")

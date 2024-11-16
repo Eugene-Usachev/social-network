@@ -75,6 +75,10 @@ func (authRepository AuthRepository) AuthenticateUser(ctx context.Context, id in
 	const query = "SELECT TRUE FROM users WHERE id = $1 AND password = $2"
 
 	if err = authRepository.postgres.QueryRow(ctx, query, id, password).Scan(&wasAuthenticated); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
+
 		return false, err
 	}
 

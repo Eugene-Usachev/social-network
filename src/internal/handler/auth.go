@@ -84,7 +84,7 @@ func (handler *Handler) SignIn(ctx *gin.Context) {
 	})
 }
 
-func (handler *Handler) Refresh(ctx *gin.Context) {
+func (handler *Handler) RefreshTokens(ctx *gin.Context) {
 	var (
 		refreshModel model.RefreshTokens
 		accessToken  string
