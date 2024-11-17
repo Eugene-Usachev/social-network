@@ -3,17 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
-	fb "github.com/Eugene-Usachev/fastbytes"
-	"github.com/Eugene-Usachev/fst"
-	"social-network/src/internal/config"
-	handlerpkg "social-network/src/internal/handler"
-	repositorypkg "social-network/src/internal/repository"
-	"social-network/src/internal/repository/postgres"
-	serverpkg "social-network/src/internal/server"
-	servicepkg "social-network/src/internal/service"
-	loggerpkg "social-network/src/pkg/logger"
 	"strconv"
 	"time"
+
+	fb "github.com/Eugene-Usachev/fastbytes"
+	"github.com/Eugene-Usachev/fst"
+	"github.com/Eugune-Usachev/social-network/src/internal/config"
+	"github.com/Eugune-Usachev/social-network/src/internal/filestorage"
+	handlerpkg "github.com/Eugune-Usachev/social-network/src/internal/handler"
+	repositorypkg "github.com/Eugune-Usachev/social-network/src/internal/repository"
+	"github.com/Eugune-Usachev/social-network/src/internal/repository/cache"
+	"github.com/Eugune-Usachev/social-network/src/internal/repository/postgres"
+	serverpkg "github.com/Eugune-Usachev/social-network/src/internal/server"
+	servicepkg "github.com/Eugune-Usachev/social-network/src/internal/service"
+	loggerpkg "github.com/Eugune-Usachev/social-network/src/pkg/logger"
 )
 
 func main() {
@@ -37,9 +40,18 @@ func main() {
 		UserPass: cfg.PostgresPass(),
 		DBName:   cfg.PostgresDBName(),
 		SSLMode:  cfg.PostgresSSLMode(),
-	}, logger))
-	service := servicepkg.NewService(repository, accessTokenConverter, refreshTokenConverter)
-	handler := handlerpkg.NewHandler(service, accessTokenConverter, refreshTokenConverter, logger)
+	}, logger), cache.MustCreateRedisCache(cfg.RedisAddr(), cfg.RedisPassword(), logger), logger)
+
+	fs := filestorage.MustNewMinIOFileStorage(
+		cfg.MinioEndpoint(),
+		cfg.MinioAccessKey(),
+		cfg.MinioSecretKey(),
+		logger,
+		repository,
+	)
+
+	service := servicepkg.NewService(repository, fs, accessTokenConverter, refreshTokenConverter)
+	handler := handlerpkg.NewHandler(cfg.IsProduction(), service, accessTokenConverter, refreshTokenConverter, logger)
 	server := serverpkg.NewHTTPServer(handler, logger)
 
 	server.MustStart(fmt.Sprintf("%s:%d", cfg.Host(), cfg.Port()), cfg.IsProduction())

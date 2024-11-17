@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"log"
+	"os"
+	"time"
+
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esutil"
 	"github.com/goccy/go-json"
 	"github.com/rs/zerolog"
-	"log"
-	"os"
-	"time"
 )
 
 type ESLogger struct {
@@ -33,7 +34,6 @@ func MustCreateElasticSearchLogger(addresses []string, user, pass string) Logger
 		PoolCompressor:           true,
 		EnableMetrics:            true,
 	})
-
 	if err != nil {
 		log.Panicf("Error creating the elastic search client: %s", err)
 	}
@@ -53,19 +53,19 @@ func MustCreateElasticSearchLogger(addresses []string, user, pass string) Logger
 		Client:     esClient,
 		FlushBytes: 1 << 20,
 		Index:      "logs",
-		OnError: func(ctx context.Context, err error) {
+		OnError: func(_ context.Context, err error) {
 			esLogger.zerologger.Error().Err(err).Msg("Error in the bulk indexer")
 		},
 		OnFlushStart: func(ctx context.Context) context.Context {
 			esLogger.zerologger.Info().Msg("Start flushing the bulk indexer")
+
 			return ctx
 		},
-		OnFlushEnd: func(ctx context.Context) {
+		OnFlushEnd: func(_ context.Context) {
 			esLogger.zerologger.Info().Msg("End flushing the bulk indexer")
 		},
 		FlushInterval: time.Second * 90,
 	})
-
 	if err != nil {
 		log.Panicf("Error creating the bulk indexer: %s", err)
 	}
@@ -87,13 +87,14 @@ func (l *ESLogger) Info(msg string) {
 	err := l.esBulkIndexer.Add(context.Background(), esutil.BulkIndexerItem{
 		Action: "index",
 		Body:   bytes.NewReader(data),
-		OnFailure: func(ctx context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
+		OnFailure: func(_ context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
 			l.zerologger.Error().Err(err).Msg("Error has been occurred while sending item from the bulk indexer")
 		},
 	})
 	if err != nil {
 		l.zerologger.Error().Err(err).Msg("Error has been occurred while adding item to the bulk indexer")
 	}
+
 	l.zerologger.Info().Msg(msg)
 }
 
@@ -103,13 +104,14 @@ func (l *ESLogger) Error(msg string) {
 	err := l.esBulkIndexer.Add(context.Background(), esutil.BulkIndexerItem{
 		Action: "index",
 		Body:   bytes.NewReader(data),
-		OnFailure: func(ctx context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
+		OnFailure: func(_ context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
 			l.zerologger.Error().Err(err).Msg("Error has been occurred while sending item from the bulk indexer")
 		},
 	})
 	if err != nil {
 		l.zerologger.Error().Err(err).Msg("Error has been occurred while adding item to the bulk indexer")
 	}
+
 	l.zerologger.Error().Msg(msg)
 }
 
@@ -119,7 +121,7 @@ func (l *ESLogger) Fatal(msg string) {
 	err := l.esBulkIndexer.Add(context.Background(), esutil.BulkIndexerItem{
 		Action: "index",
 		Body:   bytes.NewReader(data),
-		OnFailure: func(ctx context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
+		OnFailure: func(_ context.Context, _ esutil.BulkIndexerItem, _ esutil.BulkIndexerResponseItem, err error) {
 			l.zerologger.Error().Err(err).Msg("Error has been occurred while sending item from the bulk indexer")
 		},
 	})

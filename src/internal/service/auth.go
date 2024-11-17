@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+
 	fb "github.com/Eugene-Usachev/fastbytes"
 	"github.com/Eugene-Usachev/fst"
-	"social-network/src/internal/metrics"
-	"social-network/src/internal/model"
-	"social-network/src/internal/repository"
+	"github.com/Eugune-Usachev/social-network/src/internal/repository"
+	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 )
 
 type AuthService struct {
@@ -18,7 +18,11 @@ type AuthService struct {
 
 var _ Auth = (*AuthService)(nil)
 
-func NewAuthService(repository *repository.Repository, accessConverter *fst.EncodedConverter, refreshConverter *fst.EncodedConverter) *AuthService {
+func NewAuthService(
+	repository *repository.Repository,
+	accessConverter *fst.EncodedConverter,
+	refreshConverter *fst.EncodedConverter,
+) *AuthService {
 	return &AuthService{
 		repository,
 		accessConverter,
@@ -26,18 +30,21 @@ func NewAuthService(repository *repository.Repository, accessConverter *fst.Enco
 	}
 }
 
-var (
-	EmailIsBusy = errors.New("email is busy")
-)
+var ErrEmailIsBusy = errors.New("email is busy")
 
-func (authService AuthService) SignUp(ctx context.Context, model model.SignUp) (id int, accessToken, refreshToken string, err error) {
-	isEmailBusy, err := authService.repository.Auth.IsEmailBusy(ctx, model.Email)
+func (authService AuthService) SignUp(ctx context.Context, model *model.SignUp) (int, string, string, error) {
+	var (
+		accessToken, refreshToken string
+		id                        int
+	)
+
+	isEmailBusy, err := authService.repository.Auth.IsEmailBusy(ctx, model.GetEmail())
 	if err != nil {
 		return id, accessToken, refreshToken, err
 	}
 
 	if isEmailBusy {
-		return id, accessToken, refreshToken, EmailIsBusy
+		return id, accessToken, refreshToken, ErrEmailIsBusy
 	}
 
 	id, err = authService.repository.Auth.SignUp(ctx, model)
@@ -46,15 +53,15 @@ func (authService AuthService) SignUp(ctx context.Context, model model.SignUp) (
 	}
 
 	accessToken = authService.accessConverter.NewToken(fb.I2B(id))
-	refreshToken = authService.refreshConverter.NewToken(fb.S2B(model.Password))
-
-	metrics.IncUserRegistrations()
+	refreshToken = authService.refreshConverter.NewToken(fb.S2B(model.GetPassword()))
 
 	return id, accessToken, refreshToken, nil
 }
 
-func (authService AuthService) SignIn(ctx context.Context, email, password string) (id int, accessToken, refreshToken string, err error) {
-	id, err = authService.repository.Auth.SignIn(ctx, email, password)
+func (authService AuthService) SignIn(ctx context.Context, email, password string) (int, string, string, error) {
+	var accessToken, refreshToken string
+
+	id, err := authService.repository.Auth.SignIn(ctx, email, password)
 	if err != nil {
 		return id, accessToken, refreshToken, err
 	}
@@ -65,10 +72,14 @@ func (authService AuthService) SignIn(ctx context.Context, email, password strin
 	return id, accessToken, refreshToken, nil
 }
 
-var Unauthorized = errors.New("unauthorized")
+var ErrUnauthorized = errors.New("unauthorized")
 
-func (authService AuthService) RefreshTokens(ctx context.Context, id int, password string) (accessToken, refreshToken string, err error) {
-	var wasAuthenticated bool
+func (authService AuthService) RefreshTokens(ctx context.Context, id int, password string) (string, string, error) {
+	var (
+		wasAuthenticated          bool
+		accessToken, refreshToken string
+		err                       error
+	)
 
 	wasAuthenticated, err = authService.repository.Auth.AuthenticateUser(ctx, id, password)
 	if err != nil {
@@ -76,7 +87,7 @@ func (authService AuthService) RefreshTokens(ctx context.Context, id int, passwo
 	}
 
 	if !wasAuthenticated {
-		return accessToken, refreshToken, Unauthorized
+		return accessToken, refreshToken, ErrUnauthorized
 	}
 
 	accessToken = authService.accessConverter.NewToken(fb.I2B(id))

@@ -1,0 +1,21 @@
+linters:
+  disable:
+    - exportloopref
+    - wrapcheck
+    - varnamelen
+    - perfsprint
+    - mnd
+    - nosprintfhostport
+    - nonamedreturns
+    - nakedret
+    - ireturn
+    - exhaustruct
+    - depguard
+    - funlen
+    - gocognit
+    - gochecknoglobals
+    - cyclop
+    - godox
+    # TODO: allow it before release
+    - iface
+  enable-all: true

@@ -1,17 +1,19 @@
 package handler
 
 import (
+	"log"
+	"net/http"
+
 	fb "github.com/Eugene-Usachev/fastbytes"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 const (
-	keyId      = "id"
+	keyID      = "id"
 	AuthHeader = "Authorization"
 )
 
-func (handler *Handler) getClientIdFromHeaders(ctx *gin.Context) int {
+func (handler *Handler) getClientIDFromHeaders(ctx *gin.Context) int {
 	accessToken := ctx.GetHeader(AuthHeader)
 	if accessToken == "" {
 		return 0
@@ -26,16 +28,33 @@ func (handler *Handler) getClientIdFromHeaders(ctx *gin.Context) int {
 }
 
 func (handler *Handler) CheckAuth(ctx *gin.Context) {
-	id := handler.getClientIdFromHeaders(ctx)
+	id := handler.getClientIDFromHeaders(ctx)
 	if id == 0 {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+
 		return
 	}
 
-	ctx.Set(keyId, id)
+	ctx.Set(keyID, id)
 	ctx.Next()
 }
 
-func GetClientId(ctx *gin.Context) int {
-	return ctx.MustGet(keyId).(int)
+func GetClientID(ctx *gin.Context) int {
+	id, isExist := ctx.Get(keyID)
+
+	if !isExist {
+		log.Println("[BUG] Client id is not exist!")
+
+		return 0
+	}
+
+	idInt, isValid := id.(int)
+
+	if !isValid {
+		log.Println("[BUG] Client id is not int!")
+
+		return 0
+	}
+
+	return idInt
 }

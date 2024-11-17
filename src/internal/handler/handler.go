@@ -2,16 +2,18 @@ package handler
 
 import (
 	"fmt"
-	"github.com/Eugene-Usachev/fst"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"social-network/src/internal/metrics"
-	"social-network/src/internal/service"
-	loggerpkg "social-network/src/pkg/logger"
 	"time"
+
+	"github.com/Eugene-Usachev/fst"
+	"github.com/Eugune-Usachev/social-network/src/internal/metrics"
+	"github.com/Eugune-Usachev/social-network/src/internal/service"
+	loggerpkg "github.com/Eugune-Usachev/social-network/src/pkg/logger"
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
+	isProduction          bool
 	router                *gin.Engine
 	logger                loggerpkg.Logger
 	service               *service.Service
@@ -20,12 +22,14 @@ type Handler struct {
 }
 
 func NewHandler(
+	isProduction bool,
 	service *service.Service,
 	accessTokenConverter *fst.EncodedConverter,
 	refreshTokenConverter *fst.EncodedConverter,
 	logger loggerpkg.Logger,
 ) *Handler {
 	handler := &Handler{
+		isProduction:          isProduction,
 		service:               service,
 		logger:                logger,
 		accessTokenConverter:  accessTokenConverter,
@@ -51,35 +55,58 @@ func (handler *Handler) recover(ctx *gin.Context) {
 
 func (handler *Handler) metrics(ctx *gin.Context) {
 	startTime := time.Now()
+
 	ctx.Next()
+
 	elapsed := time.Since(startTime)
 	method := ctx.Request.Method
 	path := ctx.Request.URL.Path
 	statusCode := ctx.Writer.Status()
-	handler.logger.Info(fmt.Sprintf(
-		"http request | %-7s | %-21s | %d | %-9d microseconds",
-		method, path, statusCode, elapsed.Microseconds()))
+
+	if !handler.isProduction {
+		handler.logger.Info(
+			fmt.Sprintf("http request | %-7s | %-21s | %d | %-9d microseconds",
+				method, path, statusCode, elapsed.Microseconds(),
+			),
+		)
+	}
+
 	metrics.ObserveRequest(elapsed, method, path, statusCode)
 }
 
 func (handler *Handler) initRoutes() {
+	file := handler.router.Group("/file")
+	{
+		file.GET("/upload", handler.UploadFile)
+	}
+
+	fileAuth := handler.router.Group("/file", handler.CheckAuth)
+	{
+		fileAuth.GET("/upload_with_auth", handler.UploadFileWithAuth)
+	}
+
 	authGroup := handler.router.Group("/auth")
 	{
 		authGroup.POST("/sign-up", handler.SingUp)
 		authGroup.POST("/sign-in", handler.SignIn)
-		authGroup.POST("/refresh-tokens", handler.Refresh)
+		authGroup.POST("/refresh-tokens", handler.RefreshTokens)
 	}
 
 	profileGroup := handler.router.Group("/profile")
 	{
-
+		profileGroup.GET("/:userID", handler.GetSmallProfile)
+		profileGroup.GET("/:userID/info", handler.GetInfo)
 	}
+
 	profileAuthGroup := handler.router.Group("/profile", handler.CheckAuth)
 	{
-
+		profileAuthGroup.PATCH("/avatar", handler.UploadAvatar)
+		profileAuthGroup.PATCH("/small", handler.UpdateSmallProfile)
+		profileAuthGroup.PATCH("/info", handler.UpdateInfo)
 	}
 
 	metricsHandler := metrics.Handler()
+
 	handler.router.GET("/metrics", func(ctx *gin.Context) {
 		metricsHandler.ServeHTTP(ctx.Writer, ctx.Request)
 	})
