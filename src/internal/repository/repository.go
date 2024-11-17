@@ -17,7 +17,7 @@ type Auth interface {
 }
 
 type Profile interface {
-	// TODO Update Avatar
+	UpdateAvatar(ctx context.Context, id int, avatar string) (err error)
 	GetSmallProfile(ctx context.Context, id int) (profile model.SmallProfile, err error)
 	UpdateSmallProfile(ctx context.Context, id int, profile *model.UpdateSmallProfile) (err error)
 	GetInfo(ctx context.Context, id int) (info string, err error)
@@ -34,6 +34,15 @@ type Message interface{}
 
 type Post interface{}
 
+type PrivateFileMetadata interface {
+	// CheckAccess checks access to the `private` file
+	CheckAccess(ctx context.Context, filePath string, userID int) (bool, error)
+	// SaveFileMetadata saves metadata for the `private` file (including access control)
+	SaveFileMetadata(ctx context.Context, filePath string, authorizedUsers []int) error
+	// CheckFileExists checks if the `private` file path already exists in the database
+	CheckFileExists(ctx context.Context, filePath string) (bool, error)
+}
+
 type Repository struct {
 	Auth
 	Profile
@@ -42,11 +51,13 @@ type Repository struct {
 	Song
 	Message
 	Post
+	PrivateFileMetadata
 }
 
 func NewRepository(postgres *pgxpool.Pool, cache cache.Cache, logger logger.Logger) *Repository {
 	return &Repository{
-		Auth:    NewAuthRepository(postgres),
-		Profile: NewProfileRepository(postgres, cache, logger),
+		Auth:                NewAuthRepository(postgres),
+		Profile:             NewProfileRepository(postgres, cache, logger),
+		PrivateFileMetadata: NewPrivateFileMetadataRepository(postgres, logger),
 	}
 }

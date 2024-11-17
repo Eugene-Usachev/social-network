@@ -36,6 +36,18 @@ const (
 	redisKeyInfo            = "info:%d"
 )
 
+func (profileRepository *ProfileRepository) UpdateAvatar(ctx context.Context, id int, avatar string) error {
+	const query = `
+		UPDATE users 
+		SET avatar = $1
+		WHERE id = $2
+	`
+
+	_, err := profileRepository.postgres.Exec(ctx, query, avatar, id)
+
+	return err
+}
+
 func (profileRepository *ProfileRepository) GetSmallProfile(
 	ctx context.Context,
 	id int,

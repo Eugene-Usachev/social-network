@@ -75,6 +75,16 @@ func (handler *Handler) metrics(ctx *gin.Context) {
 }
 
 func (handler *Handler) initRoutes() {
+	file := handler.router.Group("/file")
+	{
+		file.GET("/upload", handler.UploadFile)
+	}
+
+	fileAuth := handler.router.Group("/file", handler.CheckAuth)
+	{
+		fileAuth.GET("/upload_with_auth", handler.UploadFileWithAuth)
+	}
+
 	authGroup := handler.router.Group("/auth")
 	{
 		authGroup.POST("/sign-up", handler.SingUp)
@@ -90,6 +100,7 @@ func (handler *Handler) initRoutes() {
 
 	profileAuthGroup := handler.router.Group("/profile", handler.CheckAuth)
 	{
+		profileAuthGroup.PATCH("/avatar", handler.UploadAvatar)
 		profileAuthGroup.PATCH("/small", handler.UpdateSmallProfile)
 		profileAuthGroup.PATCH("/info", handler.UpdateInfo)
 	}

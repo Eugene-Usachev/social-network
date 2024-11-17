@@ -5,10 +5,50 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Eugune-Usachev/social-network/src/internal/filestorage"
 	"github.com/Eugune-Usachev/social-network/src/internal/repository"
 	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 	"github.com/gin-gonic/gin"
 )
+
+func (handler *Handler) UploadAvatar(ctx *gin.Context) {
+	clientID := GetClientID(ctx)
+
+	file, err := ctx.FormFile("avatar")
+	if err != nil {
+		handler.AbortWithError(ctx, http.StatusBadRequest, err)
+	}
+
+	fileContent, err := file.Open()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to open file"})
+
+		return
+	}
+	defer fileContent.Close()
+
+	uploadedFile := filestorage.UploadedFile{
+		File:       fileContent,
+		FileHeader: file,
+	}
+
+	err = handler.service.UploadAvatar(ctx, clientID, uploadedFile)
+	if err != nil {
+		var statusCode int
+
+		if errors.Is(err, filestorage.ErrFileNameEmpty) || errors.Is(err, filestorage.ErrFileNameTooLong) {
+			statusCode = http.StatusBadRequest
+		} else {
+			statusCode = http.StatusInternalServerError
+		}
+
+		handler.AbortWithError(ctx, statusCode, err)
+
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
 
 func (handler *Handler) GetSmallProfile(ctx *gin.Context) {
 	userID64, err := strconv.ParseInt(ctx.Param("userID"), 10, 64)

@@ -3,20 +3,32 @@ package service
 import (
 	"context"
 
+	"github.com/Eugune-Usachev/social-network/src/internal/filestorage"
 	"github.com/Eugune-Usachev/social-network/src/internal/repository"
 	"github.com/Eugune-Usachev/social-network/src/pkg/model"
 )
 
 type ProfileService struct {
 	repository *repository.Repository
+	fs         filestorage.FileStorage
 }
 
 var _ Profile = (*ProfileService)(nil)
 
-func NewProfileService(repository *repository.Repository) *ProfileService {
+func NewProfileService(repository *repository.Repository, fs filestorage.FileStorage) *ProfileService {
 	return &ProfileService{
 		repository: repository,
+		fs:         fs,
 	}
+}
+
+func (profileService ProfileService) UploadAvatar(ctx context.Context, id int, file filestorage.UploadedFile) error {
+	name, err := profileService.fs.UploadFile(ctx, file, id, nil)
+	if err != nil {
+		return err
+	}
+
+	return profileService.repository.UpdateAvatar(ctx, id, name)
 }
 
 func (profileService ProfileService) GetSmallProfile(

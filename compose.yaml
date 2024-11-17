@@ -75,6 +75,17 @@ services:
     networks:
       - common
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ADMIN}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server /data --console-address ":9001"
+
   server:
     build:
       context: .
@@ -88,8 +99,11 @@ services:
       - PORT=${APP_PORT}
       - HOST=${APP_HOST}
       - IS_PRODUCTION=${APP_IS_PRODUCTION}
-      - FST_ACCESS_KEY=${FST_ACCESS_KEY}
-      - FST_REFRESH_KEY=${FST_REFRESH_KEY}
+      - FST_ACCESS_KEY=${APP_FST_ACCESS_KEY}
+      - FST_REFRESH_KEY=${APP_FST_REFRESH_KEY}
+      - MINIO_ENDPOINT=${APP_MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${APP_MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${APP_MINIO_SECRET_KEY}
       - ES_ADDRESSES=${ES_ADDRESSES}
       - ES_USERNAME=${ES_USERNAME}
       - ES_PASSWORD=${ES_PASSWORD}

@@ -30,6 +30,10 @@ type AppConfig struct {
 
 	fstAccessKey  string
 	fstRefreshKey string
+
+	minioEndpoint  string
+	minioAccessKey string
+	minioSecretKey string
 }
 
 func MustNewConfig() *AppConfig {
@@ -201,6 +205,33 @@ func MustNewConfig() *AppConfig {
 		log.Println("FST_REFRESH_KEY is not set")
 	}
 
+	minioEndpoint := os.Getenv("MINIO_ENDPOINT")
+	if minioEndpoint != "" {
+		c.minioEndpoint = minioEndpoint
+	} else {
+		isValid = false
+
+		log.Println("MINIO_ENDPOINT is not set")
+	}
+
+	minioAccessKey := os.Getenv("MINIO_ACCESS_KEY")
+	if minioAccessKey != "" {
+		c.minioAccessKey = minioAccessKey
+	} else {
+		isValid = false
+
+		log.Println("MINIO_ACCESS_KEY is not set")
+	}
+
+	minioSecretKey := os.Getenv("MINIO_SECRET_KEY")
+	if minioSecretKey != "" {
+		c.minioSecretKey = minioSecretKey
+	} else {
+		isValid = false
+
+		log.Println("MINIO_SECRET_KEY is not set")
+	}
+
 	if !isValid {
 		log.Fatal("Invalid config, read logs above")
 	}
@@ -268,4 +299,16 @@ func (appConfig *AppConfig) FstAccessKey() string {
 
 func (appConfig *AppConfig) FstRefreshKey() string {
 	return appConfig.fstRefreshKey
+}
+
+func (appConfig *AppConfig) MinioEndpoint() string {
+	return appConfig.minioEndpoint
+}
+
+func (appConfig *AppConfig) MinioAccessKey() string {
+	return appConfig.minioAccessKey
+}
+
+func (appConfig *AppConfig) MinioSecretKey() string {
+	return appConfig.minioSecretKey
 }

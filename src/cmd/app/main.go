@@ -9,6 +9,7 @@ import (
 	fb "github.com/Eugene-Usachev/fastbytes"
 	"github.com/Eugene-Usachev/fst"
 	"github.com/Eugune-Usachev/social-network/src/internal/config"
+	"github.com/Eugune-Usachev/social-network/src/internal/filestorage"
 	handlerpkg "github.com/Eugune-Usachev/social-network/src/internal/handler"
 	repositorypkg "github.com/Eugune-Usachev/social-network/src/internal/repository"
 	"github.com/Eugune-Usachev/social-network/src/internal/repository/cache"
@@ -40,7 +41,16 @@ func main() {
 		DBName:   cfg.PostgresDBName(),
 		SSLMode:  cfg.PostgresSSLMode(),
 	}, logger), cache.MustCreateRedisCache(cfg.RedisAddr(), cfg.RedisPassword(), logger), logger)
-	service := servicepkg.NewService(repository, accessTokenConverter, refreshTokenConverter)
+
+	fs := filestorage.MustNewMinIOFileStorage(
+		cfg.MinioEndpoint(),
+		cfg.MinioAccessKey(),
+		cfg.MinioSecretKey(),
+		logger,
+		repository,
+	)
+
+	service := servicepkg.NewService(repository, fs, accessTokenConverter, refreshTokenConverter)
 	handler := handlerpkg.NewHandler(cfg.IsProduction(), service, accessTokenConverter, refreshTokenConverter, logger)
 	server := serverpkg.NewHTTPServer(handler, logger)
 
