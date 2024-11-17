@@ -38,7 +38,7 @@ func (handler *Handler) GetSmallProfile(ctx *gin.Context) {
 		"second_name": profile.GetSecondName(),
 		"avatar":      profile.GetAvatar(),
 		"description": profile.GetDescription(),
-		"Birthday":    profile.GetBirthday(),
+		"birthday":    profile.GetBirthday(),
 		"gender":      profile.GetGender(),
 		"email":       profile.GetEmail(),
 	})

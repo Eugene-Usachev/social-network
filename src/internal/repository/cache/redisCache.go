@@ -20,15 +20,6 @@ const (
 	negativeCaseDurationSeconds = 300
 )
 
-func isExistsError(err error) bool {
-	redisErr, isRedisErr := rueidis.IsRedisErr(err)
-	if !isRedisErr {
-		return false
-	}
-
-	return redisErr.IsNil()
-}
-
 func MustCreateRedisCache(addr, password string, logger loggerpkg.Logger) *RedisCache {
 	client, err := rueidis.NewClient(rueidis.ClientOption{
 		InitAddress:   []string{addr},
@@ -51,7 +42,7 @@ var _ Cache = (*RedisCache)(nil)
 func (cache *RedisCache) IsNegativeCase(ctx context.Context, key string) bool {
 	res, err := cache.client.Do(ctx, cache.client.B().Exists().Key(key).Build()).AsBool()
 	if err != nil {
-		if !isExistsError(err) {
+		if !rueidis.IsRedisNil(err) {
 			cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when getting string by key: %s, error: %s", key, err.Error()))
 		}
 
@@ -64,7 +55,7 @@ func (cache *RedisCache) IsNegativeCase(ctx context.Context, key string) bool {
 func (cache *RedisCache) GetString(ctx context.Context, key string) (string, bool) {
 	res, err := cache.client.Do(ctx, cache.client.B().Get().Key(key).Build()).ToString()
 	if err != nil {
-		if !isExistsError(err) {
+		if !rueidis.IsRedisNil(err) {
 			cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when getting string by key: %s, error: %s", key, err.Error()))
 		}
 
@@ -77,7 +68,7 @@ func (cache *RedisCache) GetString(ctx context.Context, key string) (string, boo
 func (cache *RedisCache) GetBytes(ctx context.Context, key string) ([]byte, bool) {
 	res, err := cache.client.Do(ctx, cache.client.B().Get().Key(key).Build()).AsBytes()
 	if err != nil {
-		if !isExistsError(err) {
+		if !rueidis.IsRedisNil(err) {
 			cache.logger.Error(fmt.Sprintf("[Redis] Error occurred when getting string by key: %s, error: %s", key, err.Error()))
 		}
 

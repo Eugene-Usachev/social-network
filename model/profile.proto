@@ -20,5 +20,4 @@ message UpdateSmallProfile {
   string description = 3;
   string birthday = 4;
   int32 gender = 5;
-  string email = 6;
 }

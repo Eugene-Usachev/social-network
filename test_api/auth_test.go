@@ -2,18 +2,10 @@ package test_api
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
-	"time"
-)
-
-var (
-	johnID       int
-	johnEmail    = fmt.Sprintf("john.doe%d@example.com", time.Now().Unix())
-	johnPassword = "password123"
 )
 
 func TestSignUpAPI(t *testing.T) {
@@ -227,11 +219,6 @@ func TestSignInAPI(t *testing.T) {
 }
 
 func TestRefreshTokensAPI(t *testing.T) {
-	type RefreshTokensResponse struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-	}
-
 	var endpoint = serverAddr + "/auth/refresh-tokens"
 
 	client := &http.Client{}
@@ -257,7 +244,7 @@ func TestRefreshTokensAPI(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-		var response RefreshTokensResponse
+		var response refreshTokensResponse
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		if err != nil {
 			t.Fatalf("Failed to decode response: %v", err)

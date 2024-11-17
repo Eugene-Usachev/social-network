@@ -26,10 +26,10 @@ func (handler *Handler) SingUp(ctx *gin.Context) {
 		return
 	}
 
-	isValidRequest := signUpModel.GetEmail() == "" ||
-		signUpModel.GetPassword() == "" ||
-		signUpModel.GetName() == "" ||
-		signUpModel.GetSecondName() == ""
+	isValidRequest := signUpModel.GetEmail() != "" ||
+		signUpModel.GetPassword() != "" ||
+		signUpModel.GetName() != "" ||
+		signUpModel.GetSecondName() != ""
 	if !isValidRequest {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 
@@ -117,7 +117,7 @@ func (handler *Handler) RefreshTokens(ctx *gin.Context) {
 		return
 	}
 
-	if refreshModel.GetID() == -1 || refreshModel.GetPassword() == "" {
+	if refreshModel.GetId() == -1 || refreshModel.GetPassword() == "" {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 
 		return
@@ -125,7 +125,7 @@ func (handler *Handler) RefreshTokens(ctx *gin.Context) {
 
 	accessToken, refreshToken, err = handler.service.Auth.RefreshTokens(
 		ctx,
-		int(refreshModel.GetID()),
+		int(refreshModel.GetId()),
 		refreshModel.GetPassword(),
 	)
 	if err != nil {

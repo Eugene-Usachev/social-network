@@ -109,11 +109,14 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 
 	returningArgs := make([]any, 0, 8)
 	returningArgs = append(returningArgs, &smallProfile.Avatar)
+	returningArgs = append(returningArgs, &smallProfile.Email)
+	wasFirstSet := true
 
 	_, _ = query.WriteString("UPDATE users SET ")
 
 	if profile.GetName() != "" {
 		smallProfile.Name = profile.GetName()
+		wasFirstSet = false
 		_, _ = query.WriteString("name = $")
 		_, _ = query.WriteString(fmt.Sprintf("%d", i))
 
@@ -122,12 +125,18 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 	} else {
 		returningPartOfQuery.WriteString(", name")
 
-		returningArgs = append(returningArgs, &profile.Name)
+		returningArgs = append(returningArgs, &smallProfile.Name)
 	}
 
 	if profile.GetSecondName() != "" {
 		smallProfile.SecondName = profile.GetSecondName()
-		_, _ = query.WriteString(", second_name = $")
+
+		if !wasFirstSet {
+			_, _ = query.WriteString(", ")
+			wasFirstSet = false
+		}
+
+		_, _ = query.WriteString("second_name = $")
 		_, _ = query.WriteString(fmt.Sprintf("%d", i))
 
 		args = append(args, smallProfile.GetSecondName())
@@ -135,12 +144,18 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 	} else {
 		returningPartOfQuery.WriteString(", second_name")
 
-		returningArgs = append(returningArgs, &profile.SecondName)
+		returningArgs = append(returningArgs, &smallProfile.SecondName)
 	}
 
 	if profile.GetDescription() != "" {
 		smallProfile.Description = profile.GetDescription()
-		_, _ = query.WriteString(", description = $")
+
+		if !wasFirstSet {
+			_, _ = query.WriteString(", ")
+			wasFirstSet = false
+		}
+
+		_, _ = query.WriteString("description = $")
 		_, _ = query.WriteString(fmt.Sprintf("%d", i))
 
 		args = append(args, smallProfile.GetDescription())
@@ -148,12 +163,18 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 	} else {
 		returningPartOfQuery.WriteString(", description")
 
-		returningArgs = append(returningArgs, &profile.Description)
+		returningArgs = append(returningArgs, &smallProfile.Description)
 	}
 
 	if profile.GetBirthday() != "" {
 		smallProfile.Birthday = profile.GetBirthday()
-		_, _ = query.WriteString(", birthday = $")
+
+		if !wasFirstSet {
+			_, _ = query.WriteString(", ")
+			wasFirstSet = false
+		}
+
+		_, _ = query.WriteString("birthday = $")
 		_, _ = query.WriteString(fmt.Sprintf("%d", i))
 
 		args = append(args, smallProfile.GetBirthday())
@@ -161,12 +182,17 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 	} else {
 		returningPartOfQuery.WriteString(", birthday")
 
-		returningArgs = append(returningArgs, &profile.Birthday)
+		returningArgs = append(returningArgs, &smallProfile.Birthday)
 	}
 
-	if profile.GetGender() != -1 {
+	if profile.GetGender() > 0 {
 		smallProfile.Gender = profile.GetGender()
-		_, _ = query.WriteString(", gender = $")
+
+		if !wasFirstSet {
+			_, _ = query.WriteString(", ")
+		}
+
+		_, _ = query.WriteString("gender = $")
 		_, _ = query.WriteString(fmt.Sprintf("%d", i))
 
 		args = append(args, smallProfile.GetGender())
@@ -175,20 +201,7 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 	} else {
 		returningPartOfQuery.WriteString(", gender")
 
-		returningArgs = append(returningArgs, &profile.Gender)
-	}
-
-	if profile.GetEmail() != "" {
-		smallProfile.Email = profile.GetEmail()
-		_, _ = query.WriteString(", email = $")
-		_, _ = query.WriteString(fmt.Sprintf("%d", i))
-
-		args = append(args, smallProfile.GetEmail())
-		i++
-	} else {
-		returningPartOfQuery.WriteString(", email")
-
-		returningArgs = append(returningArgs, &profile.Email)
+		returningArgs = append(returningArgs, &smallProfile.Gender)
 	}
 
 	_, _ = query.WriteString(" WHERE id = $")
@@ -196,7 +209,7 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 
 	args = append(args, id)
 
-	_, _ = query.WriteString(" RETURNING avatar")
+	_, _ = query.WriteString(" RETURNING avatar, email")
 
 	if len(returningArgs) > 0 {
 		_, _ = query.WriteString(returningPartOfQuery.String())
@@ -214,7 +227,10 @@ func (profileRepository *ProfileRepository) UpdateSmallProfile(
 
 	bytes, err := proto.Marshal(&smallProfile)
 	if err != nil {
-		return err
+		profileRepository.logger.Error(
+			fmt.Sprintf("Error has been occurred while marshaling small profile, err: %s, profile: %v",
+				err.Error(), &smallProfile),
+		)
 	}
 
 	profileRepository.cache.SetBytes(ctx, fmt.Sprintf(redisKeyProfile, id), bytes)
