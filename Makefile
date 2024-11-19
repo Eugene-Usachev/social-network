@@ -6,3 +6,5 @@ generate-structs:
 			model/auth.proto
 	protoc --go_out=./src/pkg --go_opt=paths=source_relative \
 		model/profile.proto
+	protoc --go_out=./src/pkg --go_opt=paths=source_relative \
+			model/post.proto

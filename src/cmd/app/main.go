@@ -33,7 +33,7 @@ func main() {
 		SecretKey:      fb.S2B(cfg.FstRefreshKey()),
 	})
 
-	repository := repositorypkg.NewRepository(postgres.MustCreatePostgresDB(context.Background(), postgres.Config{
+	repository := repositorypkg.NewRepository(postgres.MustCreatePostgresClient(context.Background(), postgres.Config{
 		Host:     cfg.PostgresHost(),
 		Port:     strconv.Itoa(cfg.PostgresPort()),
 		UserName: cfg.PostgresUser(),

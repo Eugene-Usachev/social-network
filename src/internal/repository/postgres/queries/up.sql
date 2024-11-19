@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     gender           SMALLINT        default 0,
     -- info is a jsonb field because info can be changed in the future, and it's easier to keep it without a schema
     info             jsonb           default '{}',
+    friends BIGINT [] default ARRAY[]::BIGINT[],
+    subscribers BIGINT [] default ARRAY[]::BIGINT[],
     registered_at    TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"github.com/gocql/gocql"
+	"time"
 
 	"github.com/Eugune-Usachev/social-network/src/internal/repository/cache"
 	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
@@ -32,7 +34,18 @@ type Song interface{}
 
 type Message interface{}
 
-type Post interface{}
+type Post interface {
+	CreatePost(ctx context.Context, ownerId int, text string, survey string, files []string) (string, error)
+	GetPostsByOwnerID(
+		ctx context.Context,
+		ownerID string,
+		limit int,
+		lastQueriedCreateAt time.Time,
+	) ([]model.Post, error)
+	DeletePost(ctx context.Context, userID int, postID string) error
+	UnratePost(ctx context.Context, userID int, postID string) error
+	RatePost(ctx context.Context, userID int, postID string, isLike bool) error
+}
 
 type PrivateFileMetadata interface {
 	// CheckAccess checks access to the `private` file
@@ -54,10 +67,11 @@ type Repository struct {
 	PrivateFileMetadata
 }
 
-func NewRepository(postgres *pgxpool.Pool, cache cache.Cache, logger logger.Logger) *Repository {
+func NewRepository(postgres *pgxpool.Pool, cassandra *gocql.Session, cache cache.Cache, logger logger.Logger) *Repository {
 	return &Repository{
 		Auth:                NewAuthRepository(postgres),
 		Profile:             NewProfileRepository(postgres, cache, logger),
 		PrivateFileMetadata: NewPrivateFileMetadataRepository(postgres, logger),
+		Post:                NewPostsRepository(cassandra, logger),
 	}
 }

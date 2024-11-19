@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Eugune-Usachev/social-network/src/pkg/logger"
+	"github.com/Eugune-Usachev/social-network/src/pkg/utils"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,7 +20,7 @@ type Config struct {
 	SSLMode  string
 }
 
-func MustCreatePostgresDB(ctx context.Context, cfg Config, logger logger.Logger) *pgxpool.Pool {
+func MustCreatePostgresClient(ctx context.Context, cfg Config, logger logger.Logger) *pgxpool.Pool {
 	var (
 		pool   *pgxpool.Pool
 		err    error
@@ -28,7 +29,7 @@ func MustCreatePostgresDB(ctx context.Context, cfg Config, logger logger.Logger)
 
 	url := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", cfg.UserName, cfg.UserPass, cfg.Host, cfg.Port, cfg.DBName)
 
-	err = doWithTries(func() error {
+	err = utils.DoWithTries(func() error {
 		ctx1, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 
@@ -76,24 +77,6 @@ var upQuery string
 
 func createTablesAndIndexes(ctx context.Context, pool *pgxpool.Pool) error {
 	_, err := pool.Exec(ctx, upQuery)
-
-	return err
-}
-
-func doWithTries(fn func() error, attempts uint8, delay time.Duration) error {
-	var err error
-
-	for attempts > 0 {
-		if err = fn(); err != nil {
-			time.Sleep(delay)
-
-			attempts--
-
-			continue
-		}
-
-		return nil
-	}
 
 	return err
 }

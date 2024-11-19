@@ -54,7 +54,8 @@ func (privateFileMetadataRepository PrivateFileMetadataRepository) SaveFileMetad
 	authorizedUsers []int,
 ) error {
 	const query = `
-		INSERT INTO file_metadata (file_path, authorized_users)
+		INSERT INTO file_metadata 
+		(file_path, authorized_users)
 		VALUES ($1, $2)
 	`
 
